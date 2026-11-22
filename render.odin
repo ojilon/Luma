@@ -188,8 +188,8 @@ render_entities :: proc(w: ^World, cam: ^Camera) {
 render_title :: proc(time: f32) {
 	raylib.DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, raylib.Color{ 20, 40, 55, 120 })
 
-	title := "Luma"
-	subtitle := "The Wandering Leaf"
+	title: cstring = "Luma"
+	subtitle: cstring = "The Wandering Leaf"
 	tw := raylib.MeasureText(title, 64)
 	raylib.DrawText(title, (SCREEN_WIDTH - tw) / 2 + 2, SCREEN_HEIGHT / 2 - 100 + 2, 64,
 	                 raylib.Color{ 40, 80, 50, 180 })
@@ -201,12 +201,12 @@ render_title :: proc(time: f32) {
 
 	pulse := 0.6 + 0.4 * math.sin(time * 3.0)
 	hint_a: u8 = cast(u8)(180.0 * pulse + 40)
-	prompt := "Press ENTER or SPACE to begin"
+	prompt: cstring = "Press ENTER or SPACE to begin"
 	pw := raylib.MeasureText(prompt, 22)
 	raylib.DrawText(prompt, (SCREEN_WIDTH - pw) / 2, SCREEN_HEIGHT / 2 + 50, 22,
 	                 raylib.Color{ 255, 255, 255, hint_a })
 
-	ctrl := "WASD / Arrows  |  Shift boost  |  P pause  |  R restart"
+	ctrl: cstring = "WASD / Arrows  |  Shift boost  |  P pause  |  R restart"
 	cw := raylib.MeasureText(ctrl, 16)
 	raylib.DrawText(ctrl, (SCREEN_WIDTH - cw) / 2, SCREEN_HEIGHT - 48, 16,
 	                 raylib.Color{ 200, 220, 230, 180 })

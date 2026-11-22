@@ -181,7 +181,7 @@ world_generate_cell :: proc(w: ^World, cell_x, cell_y: int) {
 
 // Recycle entities that drifted far from the camera to free pool slots.
 world_recycle_distant :: proc(w: ^World, cam_pos: raylib.Vector2) {
-	limit_sq := WORLD_RECYCLE_DIST * WORLD_RECYCLE_DIST
+	limit_sq: f32 = WORLD_RECYCLE_DIST * WORLD_RECYCLE_DIST
 	for i in 0 ..< w.entity_count {
 		if !w.entities[i].active {
 			continue
