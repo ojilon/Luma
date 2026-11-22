@@ -7,32 +7,30 @@ You control a small flying leaf gliding through a colorful, continuous world. Co
 ## Project structure
 
 ```
-D:\projects\Luma\
+Luma/
 ├── build.bat              # Windows build script (build / run / clean)
 ├── game.odin              # Application entry point and top-level Game state
 ├── config.odin            # Constants, colors, key codes, vector helpers
 ├── player.odin            # Player / leaf logic (movement, rotation, drawing)
 ├── world.odin             # Deterministic procedural world & entity generation
-├── camera.odin            # Smooth-following 2D camera
+├── camera.odin            # Smooth-following 2D camera with look-ahead & shake
 ├── collision.odin         # Circle-circle collision detection
 ├── input.odin             # Keyboard input polling
+├── particles.odin         # Wind trails and collect / hit particle bursts
 ├── render.odin            # Sky, parallax, ground, entities and HUD drawing
-├── Luma.exe               # Built executable (debug)
 ├── README.md              # This file
 └── DEVELOPMENT_NOTES.md   # Odin implementation decisions
 ```
 
 ## Libraries used
 
-- **Odin** (dev-2026-11) — primary language
-- **vendor:raylib** (raylib v6.2 bindings + raygui available) — windowing, input, rendering, audio device
-- No external assets downloaded; all graphics are generated with raylib primitives
+- **Odin** — primary language
+- **vendor:raylib** — windowing, input, rendering
+- No external art assets; all graphics are raylib primitives and procedural shapes
 
 ## Build & run
 
-Requires the Odin compiler. Set `ODIN` in `build.bat` if it's not on your PATH.
-
-From the project directory:
+Requires the Odin compiler. Set `ODIN` in `build.bat` if it is not on your PATH.
 
 ```
 build.bat           # Build debug executable (build\Luma.exe)
@@ -43,13 +41,14 @@ build.bat clean     # Remove build output
 Raw compiler command:
 
 ```
-odin build . -debug
+odin build . -debug -out:build/Luma.exe
 ```
 
 ## Controls
 
 | Key | Action |
 |-----|--------|
+| Enter / Space | Start from title screen |
 | WASD / Arrow keys | Fly the leaf |
 | Hold Shift | Boost speed |
 | P | Pause / resume |
@@ -58,55 +57,48 @@ odin build . -debug
 
 ## Current features
 
+- Title screen with decorative leaf and prompt
 - Controllable flying leaf with smooth acceleration, deceleration and drifting
-- WASD + arrow keys; diagonal movement normalized
-- Boost (hold Shift) increases acceleration and top speed
-- Leaf rotates toward direction of travel with smooth interpolation
-- Smooth-following 2D camera with deadzone
-- Continuous, deterministic, procedural world (no level files)
-- Obstacles: tree branches, rocks, floating debris
-- Collectible glowing seeds with bobbing animation
-- Circle-circle collision with forgiveness margin
-- Score counter (seeds collected)
-- Pause system and restart mechanism
-- Gradient sky, cyan stream, emerald grass, flowers, floating islands, golden sun
-- Movement wind-trail and leaf glow effects
-- HUD with seed count, FPS and controls hint
-- Pause and game-over overlays
+- Idle float bob when nearly still; boost stretches the leaf
+- Leaf rotates toward travel direction with vein, dual-tone body and tip glow
+- Soft contact shadows under the leaf and world entities
+- Wind-trail particles while moving; sparkle burst on seed collect; dust on hit
+- Camera with deadzone, velocity look-ahead and screen shake on collision
+- Continuous deterministic procedural world (no level files)
+- Obstacles: tree branches, rocks, drifting debris
+- Collectible glowing seeds with bobbing / pulse
+- Depth scale from vertical position (subtle 2.5D)
+- Entity pool with recycle of far-off entities
+- Score counter, pause, restart, wilted leaf on game over
+- Layered sky, sun, pollen motes, parallax clouds / mountains / floating islands
+- Cyan stream, emerald grass, flowers
 
 ## Known limitations
 
-- No audio: raylib's `mini-audio`-style sound generation (`GenWaveForm`) is not present in the bundled bindings, so audio was omitted to avoid building native libraries from source
-- The world is deterministic but infinite only in the positive/negative directions as far as the 64-bit cell hash allows; entities are pooled (max 4000) and not recycled once off-screen
-- No persistent high score or saved state
-- Fixed 1280x720 window (not resizable)
+- No audio (kept out of scope to avoid native library work)
+- Generated-cell key list is fixed size; very long sessions may stop generating new cells
+- Fixed 1280x720 window
 - Collision is circle-based only
-- Debug drawing is minimal (FPS counter only)
+- Not compiled in this redesign environment (no Odin toolchain here) — build on a machine with Odin + raylib vendor
 
-## Tiny game foundation organization
+## Tiny game foundation
 
-Responsibilities are separated across single-purpose modules:
+| Responsibility | Module |
+|----------------|--------|
+| Application / loop | `game.odin` |
+| Config / types | `config.odin` |
+| Player | `player.odin` |
+| World / entities | `world.odin` |
+| Particles | `particles.odin` |
+| Camera | `camera.odin` |
+| Collision | `collision.odin` |
+| Input | `input.odin` |
+| Rendering / UI | `render.odin` |
 
-- **Application / game loop** — `game.odin` (`main`, `game_update`, `game_render`)
-- **Game state** — `Game` struct holding `mode`, `player`, `input`, `world`, `camera`
-- **Player / leaf** — `player.odin` (movement physics, rotation, drawing)
-- **World** — `world.odin` (deterministic cell-hash generation, entity pool, collected-seed tracking)
-- **Obstacles / entities** — `Entity` struct + `EntityKind` enum in `config.odin`
-- **Collision** — `collision.odin` (circle-circle, point-in-circle)
-- **Camera** — `camera.odin` (smooth-follow `Camera2D` wrapper)
-- **Rendering** — `render.odin` (sky, parallax layers, ground, entities, HUD, overlays)
-- **Input** — `input.odin` (keyboard polling into `PlayerInput`)
-- **UI** — `render.odin` (`render_ui`, `render_overlay`)
-- **Configuration / constants** — `config.odin` (tunable magic numbers, colors, key codes)
-- **Debugging** — FPS counter in HUD; no separate debug UI yet
+## Next steps
 
-## Next development steps
-
-1. Add audio using `vendor:miniaudio` or simple procedural beeps via raylib
-2. Add particle effects (dust, sparkles when collecting seeds)
-3. Add a start/menu screen and game-over restart prompt via raygui
-4. Add screen shake on collision and a "leaf wilted" visual state
-5. Add parallax layer variety (more distant islands, fog)
-6. Add a high-score / session summary
-7. Allow window resizing and camera zoom
-8. Recycle off-screen entities to remove the entity pool cap
+1. Procedural audio via `vendor:miniaudio` or raylib sound helpers
+2. More particle variety (pollen that reacts to leaf motion)
+3. raygui menu and high-score panel
+4. Window resize + optional camera zoom
+5. Biome tint shifts as the player travels farther
