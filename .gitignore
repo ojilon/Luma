@@ -1,5 +1,5 @@
+build/
 *.exe
 *.pdb
-
-#build folder
-build/
+*.obj
+.DS_Store

@@ -3,6 +3,8 @@ set ODIN=D:\Dev\Odin\odin.exe
 if not exist "%ODIN%" set ODIN=odin
 cd /d %~dp0
 
+if not exist build mkdir build
+
 if "%1"=="" (
     echo Building Luma: The Wandering Leaf debug build...
     "%ODIN%" build . -debug -out:build\Luma.exe
